@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Deepeer AI — Warehouse OS</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="app-shell">
+    <!-- ==================== VISTA 1: ASISTENTE CHAT ==================== -->
+    <section id="view-chat" class="view active">
+      <header class="top-header">
+        <div class="brand">
+          <div class="brand-icon"> <img src="logo.png" width="25" height="auto" alt="Logo" /></div>
+          <div>
+            <span class="brand-sub">DEEPEER AI</span>
+            <h1 class="brand-title">Deepeer Ai</h1>
+          </div>
+        </div>
+        <div class="header-actions">
+          <button class="icon-btn" title="Escanear QR">⊞</button>
+          <div class="avatar">LC</div>
+        </div>
+      </header>
+
+      <div class="assistant-bar">
+        <div class="assistant-info">
+          <div class="bot-badge">🤖</div>
+          <div>
+            <h2>Asistente Deepeer</h2>
+            <p class="status-text"><span class="dot-online"></span> IA Activa • MySQL deepper</p>
+          </div>
+        </div>
+        <button id="clearChatBtn" class="btn-ghost" onclick="clearChat()">🧹 Limpiar</button>
+      </div>
+
+      <main id="chatBox" class="chat-container">
+        <div class="date-pill">Hoy</div>
+
+        <!-- Mensaje de bienvenida -->
+        <div class="message assistant">
+          <p>¡Hola! Soy <strong>Deepeer</strong>, tu asistente de almacén conectado a la base de datos. Puedes consultarme existencias, movimientos por tipo (entrada, salida, ajuste, merma) o caducidad de lotes.</p>
+        </div>
+      </main>
+
+      <!-- Sugerencias rápidas -->
+      <div class="quick-chips">
+        <button class="chip" onclick="sendQuickPrompt('¿Cuáles son los 3 productos con más salidas?')">📦 Top 3 salidas</button>
+        <button class="chip" onclick="sendQuickPrompt('¿Qué productos están por debajo de su stock mínimo?')">⚠️ Bajo stock</button>
+        <button class="chip" onclick="sendQuickPrompt('¿Qué lotes tienen fecha de caducidad y cuándo vencen?')">📅 Lotes por vencer</button>
+        <button class="chip" onclick="sendQuickPrompt('¿Cuántas unidades se han perdido por merma?')">📉 Mermas</button>
+      </div>
+
+      <!-- Barra de entrada -->
+      <div class="input-wrapper">
+        <div class="input-bar">
+          <button class="attach-btn" title="Adjuntar">📎</button>
+          <input
+            type="text"
+            id="userInput"
+            placeholder="Escribe una orden o consulta a Deepeer..."
+            onkeypress="handleKeyPress(event)"
+          />
+          <button id="sendBtn" class="send-btn" onclick="sendMessage()">➤</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== VISTA 2: DASHBOARD INDICADORES ==================== -->
+    <section id="view-dashboard" class="view">
+      <header class="top-header">
+        <div class="brand">
+          <div class="brand-icon purple-glow"> <img src="logo.png" width="25" height="auto" alt="Logo" /></div>
+          <div>
+            <h1 class="brand-title">DEEPEER <span class="badge-ai">AI</span></h1>
+            <span class="brand-sub">WAREHOUSE OS</span>
+          </div>
+        </div>
+        <div class="header-actions">
+          <div class="avatar">LC</div>
+        </div>
+      </header>
+
+      <div class="dashboard-scroll">
+        <!-- Selector de vista -->
+        <div class="segmented-control">
+          <button class="seg-btn active">📊 Vista 2D (Métricas)</button>
+          <button class="seg-btn" onclick="switchView('chat')">💬 Consultar IA</button>
+        </div>
+
+        <!-- Grid de 4 KPIs Principales -->
+        <div class="kpi-grid">
+          <div class="card kpi-card">
+            <div class="kpi-head">
+              <span>Total en Stock</span>
+              <span class="kpi-icon">📦</span>
+            </div>
+            <div class="kpi-value">1,248 <small>uds</small></div>
+            <div class="kpi-trend positive">↗ +8.4% esta semana</div>
+          </div>
+
+          <div class="card kpi-card">
+            <div class="kpi-head">
+              <span>Valor Inventario</span>
+              <span class="kpi-icon">💰</span>
+            </div>
+            <div class="kpi-value">$48,920 <small>MXN</small></div>
+            <div class="kpi-sub">● Valuación activa</div>
+          </div>
+
+          <div class="card kpi-card">
+            <div class="kpi-head">
+              <span>Bajo Stock</span>
+              <span class="tag-danger">CRÍTICO</span>
+            </div>
+            <div class="kpi-value">4 <small>SKUs</small></div>
+            <div class="kpi-trend danger">⚠️ Reposición requerida</div>
+          </div>
+
+          <div class="card kpi-card">
+            <div class="kpi-head">
+              <span>Movimientos Hoy</span>
+              <span class="kpi-icon">🔄</span>
+            </div>
+            <div class="kpi-value">96 <small>regs</small></div>
+            <div class="kpi-trend purple">✔ 100% Auditado</div>
+          </div>
+        </div>
+
+        <!-- Indicadores por Tipo de Movimiento -->
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <h3>Indicadores por Tipo de Movimiento</h3>
+              <p class="card-sub">Distribución acumulada en almacén</p>
+            </div>
+            <span class="badge-outline">4 Tipos</span>
+          </div>
+
+          <div class="movement-types-grid">
+            <div class="mov-item entrada">
+              <div class="mov-top">
+                <span class="mov-label">⬇ Entradas</span>
+                <span class="mov-pct">+54%</span>
+              </div>
+              <div class="mov-num">320 <small>uds</small></div>
+              <div class="progress-track"><div class="progress-fill green" style="width: 78%;"></div></div>
+            </div>
+
+            <div class="mov-item salida">
+              <div class="mov-top">
+                <span class="mov-label">⬆ Salidas</span>
+                <span class="mov-pct">-31%</span>
+              </div>
+              <div class="mov-num">184 <small>uds</small></div>
+              <div class="progress-track"><div class="progress-fill purple" style="width: 58%;"></div></div>
+            </div>
+
+            <div class="mov-item ajuste">
+              <div class="mov-top">
+                <span class="mov-label">⚖️ Ajustes</span>
+                <span class="mov-pct">9%</span>
+              </div>
+              <div class="mov-num">42 <small>uds</small></div>
+              <div class="progress-track"><div class="progress-fill amber" style="width: 28%;"></div></div>
+            </div>
+
+            <div class="mov-item merma">
+              <div class="mov-top">
+                <span class="mov-label">📉 Mermas</span>
+                <span class="mov-pct">6%</span>
+              </div>
+              <div class="mov-num">19 <small>uds</small></div>
+              <div class="progress-track"><div class="progress-fill red" style="width: 16%;"></div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Gráfica de Barras: Entradas vs Salidas Semanales -->
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <h3>Entradas vs. Salidas Semanales</h3>
+              <p class="card-sub">Cargas y despachos consolidados</p>
+            </div>
+            <div class="legend">
+              <span><i class="dot purple"></i> Entradas</span>
+              <span><i class="dot lavender"></i> Salidas</span>
+            </div>
+          </div>
+
+          <div class="bar-chart">
+            <div class="bar-group">
+              <div class="bars">
+                <div class="bar bar-in" style="height: 65%;" title="Entradas: 65"></div>
+                <div class="bar bar-out" style="height: 45%;" title="Salidas: 45"></div>
+              </div>
+              <span>Lun</span>
+            </div>
+            <div class="bar-group">
+              <div class="bars">
+                <div class="bar bar-in" style="height: 80%;" title="Entradas: 80"></div>
+                <div class="bar bar-out" style="height: 55%;" title="Salidas: 55"></div>
+              </div>
+              <span>Mar</span>
+            </div>
+            <div class="bar-group">
+              <div class="bars">
+                <div class="bar bar-in" style="height: 92%;" title="Entradas: 92"></div>
+                <div class="bar bar-out" style="height: 85%;" title="Salidas: 85"></div>
+              </div>
+              <span>Mié</span>
+            </div>
+            <div class="bar-group">
+              <div class="bars">
+                <div class="bar bar-in" style="height: 52%;" title="Entradas: 52"></div>
+                <div class="bar bar-out" style="height: 70%;" title="Salidas: 70"></div>
+              </div>
+              <span>Jue</span>
+            </div>
+            <div class="bar-group">
+              <div class="bars">
+                <div class="bar bar-in" style="height: 98%;" title="Entradas: 98"></div>
+                <div class="bar bar-out" style="height: 64%;" title="Salidas: 64"></div>
+              </div>
+              <span>Vie</span>
+            </div>
+            <div class="bar-group">
+              <div class="bars">
+                <div class="bar bar-in" style="height: 38%;" title="Entradas: 38"></div>
+                <div class="bar bar-out" style="height: 30%;" title="Salidas: 30"></div>
+              </div>
+              <span>Sáb</span>
+            </div>
+          </div>
+
+          <div class="chart-footer">
+            <span>🕒 Pico semanal: Viernes (98 uds)</span>
+            <span class="positive">+18.4% neto</span>
+          </div>
+        </div>
+
+        <!-- Distribución de Lotes y Caducidad -->
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <h3>Distribución de Lotes y Caducidad</h3>
+              <p class="card-sub">Ciclo de vida en inventario</p>
+            </div>
+            <span class="badge-outline">FIFO</span>
+          </div>
+
+          <div class="donut-row">
+            <div class="donut-chart">
+              <div class="donut-hole">
+                <strong>78%</strong>
+                <span>SALUDABLE</span>
+              </div>
+            </div>
+
+            <div class="donut-legend">
+              <div class="legend-item">
+                <span class="dot purple"></span>
+                <div>
+                  <strong>78% En regla</strong>
+                  <small>Lotes vigentes en almacén</small>
+                </div>
+              </div>
+              <div class="legend-item">
+                <span class="dot amber"></span>
+                <div>
+                  <strong>16% &lt; 30 días</strong>
+                  <small>Próximos a rotar</small>
+                </div>
+              </div>
+              <div class="legend-item">
+                <span class="dot red"></span>
+                <div>
+                  <strong>6% Crítico / Merma</strong>
+                  <small>Atención prioritaria</small>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Centro de Alertas -->
+        <div class="alerts-section">
+          <div class="alerts-header">
+            <h3>🔔 Centro de Alertas</h3>
+            <span class="tag-danger">2 URGENTES</span>
+          </div>
+
+          <div class="alert-card critical">
+            <div class="alert-icon red">✱</div>
+            <div class="alert-body">
+              <span class="alert-type red">STOCK CRÍTICO • Cinta de empaque</span>
+              <h4>Existencias agotadas (0 uds)</h4>
+              <p>Stock mínimo requerido: 5 unidades. Alta demanda en salidas.</p>
+              <button class="btn-primary-sm" onclick="askFromAlert('Dame el historial de movimientos de la Cinta de empaque')">
+                Consultar en Chat IA →
+              </button>
+            </div>
+          </div>
+
+          <div class="alert-card warning">
+            <div class="alert-icon amber">⏳</div>
+            <div class="alert-body">
+              <span class="alert-type amber">ADVERTENCIA CADUCIDAD • LOT-GEL-261103</span>
+              <h4>Revisión preventiva de lote</h4>
+              <p>Verificar fechas de vencimiento en categoría Limpieza e Higiene.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== BARRA DE NAVEGACIÓN INFERIOR ==================== -->
+    <nav class="bottom-nav">
+      <button id="nav-dashboard" class="nav-item" onclick="switchView('dashboard')">
+        <span class="nav-icon">⊞</span>
+        <span>Tablero</span>
+      </button>
+      <button class="nav-item" onclick="sendQuickPrompt('Muéstrame el inventario actual completo'); switchView('chat');">
+        <span class="nav-icon">📦</span>
+        <span>Inventario</span>
+      </button>
+      <button id="nav-chat" class="nav-item center-fab active" onclick="switchView('chat')">
+        <div class="fab-circle">🧠</div>
+        <span>Asistente</span>
+      </button>
+      <button class="nav-item" onclick="sendQuickPrompt('¿Qué movimientos se han registrado recientemente?'); switchView('chat');">
+        <span class="nav-icon">🚚</span>
+        <span>Movimientos</span>
+      </button>
+      <button class="nav-item" onclick="sendQuickPrompt('¿Quiénes son los usuarios registrados y sus roles?'); switchView('chat');">
+        <span class="nav-icon">👤</span>
+        <span>Usuarios</span>
+      </button>
+    </nav>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
